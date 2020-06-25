@@ -54,17 +54,31 @@ def dirSearch(folder, found=[]):
     return imports
 
 
-
-if len(sys.argv) == 2:
+# choose root folder (default is the folder the script is being run in)
+if len(sys.argv) == 3:
     folder = sys.argv[1]
+    req = sys.argv[2]
+elif len(sys.argv) == 2:
+    if sys.argv[1] == "-H" or sys.argv[1] == "--help":
+        print("usage: python3 dirfreeze.py Optional[root_dir_path] Optional[requirements_file_path]\n"
+              "dirfreeze takes an existing requirements.txt file and clears up any unnecessary libraries from there depending on imports found in all python files inside the specified root dir (the directory where it's being run from by default)")
+        quit()
+    folder = sys.argv[1]
+    req = folder
 else:
     folder = os.getcwd()
+    req = folder
 
-
+# clean up requirements file
 imports = dirSearch(folder)
 
-with open(f"{folder}/requirements.txt") as f:
-    libs = f.readlines()
+if os.path.exists(f"{req}/requirements.txt"):
+    with open(f"{req}/requirements.txt") as f:
+        libs = f.readlines()
+else:
+    print("no requirements file found\nplease make sure it's inside the folder dirfreeze is being run on OR specify its path as the second argument")
+    print("usage: python3 dirfreeze.py Optional[root_dir_path] Optional[requirements_file_path]")
+    quit()
 towrite = []
 for i, lib in enumerate(libs):
     li = lib.split("==")[0]
@@ -74,5 +88,5 @@ for i, lib in enumerate(libs):
 
 towrite = set(towrite)
 towrite = list(towrite)
-with open(f"{folder}/requirements.txt", 'w') as f:
+with open(f"{req}/requirements.txt", 'w') as f:
     f.writelines(towrite)
